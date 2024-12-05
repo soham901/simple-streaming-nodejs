@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Streamed User Data</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="bg-gray-100 py-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-4xl mx-auto">
+      <h1 class="text-3xl font-bold text-gray-900 mb-6">Streamed User Data</h1>
+      <div class="bg-white shadow overflow-hidden sm:rounded-lg">
+        <ul id="data-list" class="divide-y divide-gray-200">
+          <!-- Dynamically populated list items will appear here -->
+        </ul>
+      </div>
+    </div>
+
+    <script>
+      async function fetchStreamedData() {
+        try {
+          const response = await fetch("http://localhost:3000", {
+            headers: { Accept: "text/plain" },
+            method: "POST",
+          });
+
+          if (!response.ok) {
+            throw new Error(`Error: ${response.statusText}`);
+          }
+
+          const reader = response.body ? response.body.getReader() : null;
+          const decoder = new TextDecoder("utf-8");
+          let dataList = document.getElementById("data-list");
+
+          while (true) {
+            if (!reader) break;
+            const { value, done } = await reader.read();
+            if (done) break;
+
+            const chunk = decoder.decode(value, { stream: true });
+            const newData = JSON.parse(chunk);
+
+            // Create a new list item with the streamed data
+            const listItem = document.createElement("li");
+            listItem.classList.add("px-4", "py-4", "sm:px-6");
+
+            listItem.innerHTML = `
+              <div class="flex items-center justify-between">
+                <p class="text-sm font-medium text-indigo-600 truncate">
+                  ${newData.first_name} ${newData.last_name}
+                </p>
+                <div class="ml-2 flex-shrink-0 flex">
+                  <p class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                    ${newData.gender}
+                  </p>
+                </div>
+              </div>
+              <div class="mt-2 sm:flex sm:justify-between">
+                <div class="sm:flex">
+                  <p class="flex items-center text-sm text-gray-500">
+                    ${newData.email}
+                  </p>
+                </div>
+                <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                  <p>
+                    IP: ${newData.ip_address}
+                  </p>
+                </div>
+              </div>
+            `;
+
+            dataList.appendChild(listItem);
+          }
+        } catch (error) {
+          console.error("Error fetching streamed data:", error);
+        }
+      }
+
+      // Start fetching streamed data when the page loads
+      fetchStreamedData();
+    </script>
+  </body>
+</html>
