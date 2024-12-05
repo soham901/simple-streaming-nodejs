@@ -100,10 +100,6 @@ I was working on a client project where I'm using an AI API that was taking ~2m 
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
-## License
-
-This project is open source and available under the [MIT License](LICENSE).
-
 ## Author
 
 Soham Sagathiya - [@soham901](https://github.com/soham901)
